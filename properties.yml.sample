@@ -1,0 +1,5 @@
+---
+hoge_server:
+  :roles:
+  - base
+  :host_name: hoge_server
