@@ -1,0 +1,29 @@
+[
+  {
+    "host": "tst-vmcentos70a",
+    "env": "production",
+    "user": "hoge",
+    "pass": "himitsu",
+    "roles": [
+      "base"
+    ]
+  },
+  {
+    "host": "tst-vmcentos70b",
+    "env": "development",
+    "user": "edo",
+    "pass": "none",
+    "roles": [
+      "base"
+    ]
+  },
+  {
+    "host": "tst-vmcentos70ba",
+    "env": "development",
+    "user": "hoge",
+    "pass": "himitsu",
+    "roles": [
+      "base"
+    ]
+  }
+]

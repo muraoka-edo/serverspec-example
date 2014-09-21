@@ -1,29 +1,36 @@
 require 'rake'
 require 'rspec/core/rake_task'
 require 'ci/reporter/rake/rspec'
-require 'yaml'
+require 'json'
 
-hosts = YAML.load_file('properties.yml')
+servers = JSON.parse(File.read('properties.json'))
 
-desc "Run serverspec to all hosts (=serverspec:all)"
+desc "Run serverspec to all servers"
 task :spec => 'serverspec:all'
 
 class ServerspecTask < RSpec::Core::RakeTask
-  attr_accessor :target
+  attr_accessor :target_host, :target_user, :target_pass, :target_env
+
   def spec_command
     cmd = super
-    "env TARGET_HOST=#{target} #{cmd}"
+    "env TARGET_HOST=#{target_host} \
+         TARGET_USER=#{target_user} \
+         TARGET_PASS=#{target_pass} \
+         TARGET_ENV=#{ target_env } \
+    #{cmd}"
   end
 end
 
 namespace :serverspec do
-  desc "Run serverspec to all hosts (=spec)"
-  task :all => hosts.keys.map {|host| 'serverspec:' + host }
-  hosts.keys.each do |host|
-    desc "Run serverspec to #{host}"
-    ServerspecTask.new(host.to_sym) do |t|
-      t.target = host
-      t.pattern = 'spec/{' + hosts[host][:roles].join(',') + '}/*_spec.rb'
+  task :all => servers.map {|s| 'serverspec:' + s['host'] }
+  servers.each do |server|
+    desc "Run serverspec to #{server['host']}"
+    ServerspecTask.new(server['host'].to_sym) do |t|
+      t.target_host = server['host']
+      t.target_user = server['user']
+      t.target_pass = server['pass']
+      t.target_env  = server['env' ]
+      t.pattern = 'spec/{' + server['roles'].join(',') + '}/*_spec.rb'
     end
   end
 end
