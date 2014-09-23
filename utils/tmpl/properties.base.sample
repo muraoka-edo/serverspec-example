@@ -1,3 +1,0 @@
-host,attrs
-webap,base:apache:tomcat
-db,base:mysql
