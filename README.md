@@ -3,59 +3,68 @@
 ---
 
 ## やりたい事
-- 複数ホストに対してリモート(ssh)でServerspec実行
+- 多段ssh経由でServerspec実行
 <br>
 
 ## 事前作業
 
-- SSH鍵設定
-ポート番号（22番以外）や多段sshを"~/.ssh/config"で吸収
+### SSH鍵設定（~/.ssh/config）
+多段sshを"~/.ssh/config"で吸収（ncコマンド）
+(ssh -W は Opensshバージョン5.4から利用可能な為、CentOS6.X だと利用できない）
+     > $ cat /etc/redhat-release 
+CentOS release 6.4 (Final)
+\$ ssh -v
+OpenSSH_5.3p1, OpenSSL 1.0.0-fips 29 Mar 2010
 
-     > \$ vi ~/.ssh/config
-
-- プロパティファイル（接続ホスト情報）作成
-
-    > \$ cat utils/tmpl/properties.base
-    host,attrs
-    test-server,base
-    \$ utils/print_properties.yml.rb utils/tmpl/properties.base > properties.yml
-    \$ cat properties.yml
-    \---
-    test-server:
-       :roles:
-       \- base
-    :host_name: test-server
-
-- rake -T
-テストケースを表示
-> \$ rake -T
-rake serverspec:tst-vmcentos70a   # Run serverspec to tst-vmcentos70a
-rake serverspec:tst-vmcentos70b   # Run serverspec to tst-vmcentos70b
-rake serverspec:tst-vmcentos70ba  # Run serverspec to tst-vmcentos70ba
-rake spec                         # Run serverspec to all servers
 
 - Serverspec実行
   > \$ for s in \$(rake -T | grep -v 'all servers'|awk '{print \$2}');do echo "[Spec]\$s:"; rake \$s SPEC_OPTS="--format html" >\${s}.html ; done
 
-- .ssh/config
-パスワード認証でログインするホスト
-  >\ $ cat ~/.ssh/config
-    Host tst-vmcentos70a
+- ~/.ssh/config
+   踏み台サーバー
+   > Host bastion
+        User            hoge
+        HostName        vmcentos64key
+        IdentityFile    ~/.ssh/id_rsa
+        Port            22  
+    
+   接続先サーバー
+> Host vmcentos70key
     User            hoge
-    HostName        vmcentos70a
-    Port            22
+    HostName        192.168.56.8
+    IdentityFile    ~/.ssh/keys/id_rsa_vmcentos64key
+    Port            22  
+    ProxyCommand ssh bastion nc %h %p
 
-   鍵認証（パス無し）でログインするホスト
-   >Host tst-vmcentos70b
-    User            edo
-    HostName        vmcentos70b
-    IdentityFile    ~/.ssh/id_rsa_2048_edo_mac.local
-    Port            22
-   
-   鍵認証（tst-vmcentos70）経由でパスワード認証（tst-vmcentos70a）のサーバへログイン
-   > Host tst-vmcentos70ba
-    User            hoge
-    HostName        vmcentos70a
-    Port            22
-    ProxyCommand ssh -W %h:%p tst-vmcentos70b
+### プロパティファイル作成
+> \$ ./print_properties.rb tmpl/properties.base.csv  > print_properties.rb
+\$ cat properties.json 
+[
+  {
+    "host": "bastion",
+    "hostname": "vmcentos64key",
+    "env": "production",
+    "user": "hoge",
+    "roles": [
+      "base"
+    ]
+  },
+  {
+    "host": "vmcentos70key",
+    "hostname": "192.168.56.8",
+    "env": "production",
+    "user": "edo",
+    "roles": [
+      "base"
+    ]
+  }
+]
 
+### テストケースを表示
+>\$ rake -T
+rake serverspec:bastion        # Run serverspec to bastion
+rake serverspec:vmcentos70key  # Run serverspec to vmcentos70key
+rake spec                      # Run serverspec to all servers
+
+### Serverspec実行（HTML形式で保存）
+>\$ for s in \$(rake -T | grep -v 'all servers'|awk '{print \$2}');do echo "[Spec]\$s:"; rake \$s SPEC_OPTS="--format html" >\${s}.html ; done

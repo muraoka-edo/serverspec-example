@@ -9,13 +9,11 @@ desc "Run serverspec to all servers"
 task :spec => 'serverspec:all'
 
 class ServerspecTask < RSpec::Core::RakeTask
-  attr_accessor :target_host, :target_user, :target_pass, :target_env
+  attr_accessor :target_host, :target_env
 
   def spec_command
     cmd = super
     "env TARGET_HOST=#{target_host} \
-         TARGET_USER=#{target_user} \
-         TARGET_PASS=#{target_pass} \
          TARGET_ENV=#{ target_env } \
     #{cmd}"
   end
@@ -27,8 +25,6 @@ namespace :serverspec do
     desc "Run serverspec to #{server['host']}"
     ServerspecTask.new(server['host'].to_sym) do |t|
       t.target_host = server['host']
-      t.target_user = server['user']
-      t.target_pass = server['pass']
       t.target_env  = server['env' ]
       t.pattern = 'spec/{' + server['roles'].join(',') + '}/*_spec.rb'
     end

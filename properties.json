@@ -1,27 +1,18 @@
 [
   {
-    "host": "tst-vmcentos70a",
+    "host": "bastion",
+    "hostname": "vmcentos64key",
     "env": "production",
     "user": "hoge",
-    "pass": "himitsu",
     "roles": [
       "base"
     ]
   },
   {
-    "host": "tst-vmcentos70b",
-    "env": "development",
+    "host": "vmcentos70key",
+    "hostname": "192.168.56.8",
+    "env": "production",
     "user": "edo",
-    "pass": "none",
-    "roles": [
-      "base"
-    ]
-  },
-  {
-    "host": "tst-vmcentos70ba",
-    "env": "development",
-    "user": "hoge",
-    "pass": "himitsu",
     "roles": [
       "base"
     ]
