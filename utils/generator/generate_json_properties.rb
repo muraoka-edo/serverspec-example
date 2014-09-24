@@ -21,12 +21,14 @@ class GenProps
       env       = row["env"     ]
       user      = row["user"    ]
       attrs     = row["attrs"   ].split(':')
+      features  = row["features"].split(':')
       property_of = Hash.new
       property_of[:host    ] = host
       property_of[:hostname] = hostname
       property_of[:env     ] = env
       property_of[:user    ] = user
       property_of[:roles   ] = attrs
+      property_of[:features] = features
       @properties << property_of
     end
 
