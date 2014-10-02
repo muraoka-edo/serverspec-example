@@ -1,3 +1,3 @@
-host			hostname			env			user	attrs		features
-bastion 		testbastion			production	hoge	base:apache	os:apache
-vmcentos70key	testvmcentos70key	production	hoge	base		os
+host			hostname			env			user	attrs
+bastion 		vmcentos64key		production	hoge	base:apache
+vmcentos70key	192.168.56.8		production	root	base
