@@ -11,21 +11,41 @@
 - SSH鍵設定
 ポート番号（22番以外）や多段sshを"~/.ssh/config"で吸収
 
-     > \$ vi ~/.ssh/config
+> \$ vi ~/.ssh/config
 
 - プロパティファイル（接続ホスト情報）作成
 
-    > \$ cat utils/tmpl/properties.base
-    host,attrs
-    test-server,base
-    \$ utils/generate_json_properties.rb -t 'json' > properties.yml
-    \$ cat properties.yml
-    \---
-    test-server:
-       :roles:
-       \- base
-    :host_name: test-server
-     \$ utils/generate_json_properties.rb -t 'csv'  #TODO
+```
+$ cat ~/ops/repos/target/basic_config 
+host			hostname			env			user	roles
+bastion 		192.168.56.1	     production	hoge	base:apache
+produciont-svr	192.168.56.8		production	root	base
+host,attrs
+
+$ utils/generate_json_properties.rb -t 'json' > properties.yml
+$ cat properties.yml
+[
+  {
+    "host": "bastion",
+    "hostname": "192.168.56.1",
+    "env": "development",
+    "user": "hoge",
+    "roles": [
+      "base",
+      "apache"
+    ]
+  },
+  {
+    "host": "vmcentos70key",
+    "hostname": "192.168.56.8",
+    "env": "production",
+    "user": "root",
+    "roles": [
+      "base"
+    ]
+  }
+]
+```
     
 
 - rake -T
@@ -41,14 +61,14 @@ rake spec                         # Run serverspec to all servers
 
 - ~/.ssh/config
 ファイル作成 
-> \$ utils/generate_json_properties.rb -t 'ssh'  > ~/.ssh/config
+> \$ utils/generate_properties.rb -t 'ssh'  > ~/.ssh/config
 
 - 出力結果：鍵認証（パス無し）でログインするホスト
 
 ```
 Host bastion
     User            hoge
-    HostName        vmcentos64key
+    HostName        192.168.56.1
     IdentityFile    ~/.ssh/id_rsa
     Port            22
     StrictHostKeyChecking no
