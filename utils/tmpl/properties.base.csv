@@ -1,3 +1,0 @@
-host			hostname			env			user	attrs
-bastion 		vmcentos64key		production	hoge	base:apache
-vmcentos70key	192.168.56.8		production	root	base
