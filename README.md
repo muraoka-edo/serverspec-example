@@ -3,68 +3,87 @@
 ---
 
 ## やりたい事
-- 多段ssh経由でServerspec実行
+- 複数ホストに対してリモート(ssh)でServerspec実行
 <br>
 
 ## 事前作業
 
-### SSH鍵設定（~/.ssh/config）
-多段sshを"~/.ssh/config"で吸収（ncコマンド）
-(ssh -W は Opensshバージョン5.4から利用可能な為、CentOS6.X だと利用できない）
-     > $ cat /etc/redhat-release 
-CentOS release 6.4 (Final)
-\$ ssh -v
-OpenSSH_5.3p1, OpenSSL 1.0.0-fips 29 Mar 2010
+- SSH鍵設定
+ポート番号（22番以外）や多段sshを"~/.ssh/config"で吸収
 
+> \$ vi ~/.ssh/config
 
-- Serverspec実行
-  > \$ for s in \$(rake -T | grep -v 'all servers'|awk '{print \$2}');do echo "[Spec]\$s:"; rake \$s SPEC_OPTS="--format html" >\${s}.html ; done
+- プロパティファイル（接続ホスト情報）作成
 
-- ~/.ssh/config
-   踏み台サーバー
-   > Host bastion
-        User            hoge
-        HostName        vmcentos64key
-        IdentityFile    ~/.ssh/id_rsa
-        Port            22  
-    
-   接続先サーバー
-> Host vmcentos70key
-    User            hoge
-    HostName        192.168.56.8
-    IdentityFile    ~/.ssh/keys/id_rsa_vmcentos64key
-    Port            22  
-    ProxyCommand ssh bastion nc %h %p
+```
+$ cat ~/ops/repos/target/basic_config 
+host            hostname            env         user    roles
+bastion         192.168.56.1         production hoge    base:apache
+produciont-svr  192.168.56.8        production  root    base
+host,attrs
 
-### プロパティファイル作成
-> \$ ./print_properties.rb tmpl/properties.base.csv  > print_properties.rb
-\$ cat properties.json 
+$ utils/generate_json_properties.rb -t 'json' > properties.yml
+$ cat properties.yml
 [
   {
     "host": "bastion",
-    "hostname": "vmcentos64key",
-    "env": "production",
+    "hostname": "192.168.56.1",
+    "env": "development",
     "user": "hoge",
     "roles": [
-      "base"
+      "base",
+      "apache"
     ]
   },
   {
     "host": "vmcentos70key",
     "hostname": "192.168.56.8",
     "env": "production",
-    "user": "edo",
+    "user": "root",
     "roles": [
       "base"
     ]
   }
 ]
+```
+    
 
-### テストケースを表示
->\$ rake -T
-rake serverspec:bastion        # Run serverspec to bastion
-rake serverspec:vmcentos70key  # Run serverspec to vmcentos70key
-rake spec                      # Run serverspec to all servers
+- rake -T
+テストケースを表示
+> \$ rake -T
+rake serverspec:tst-vmcentos70a   # Run serverspec to tst-vmcentos70a
+rake serverspec:tst-vmcentos70b   # Run serverspec to tst-vmcentos70b
+rake serverspec:tst-vmcentos70ba  # Run serverspec to tst-vmcentos70ba
+rake spec                         # Run serverspec to all servers
 
-### Serverspec実行（HTML形式で保存）
->\$ for s in \$(rake -T | grep -v 'all servers'|awk '{print \$2}');do echo "[Spec]\$s:"; rake \$s SPEC_OPTS="--format html" >\${s}.html ; done
+- Serverspec実行
+  > \$ for s in \$(rake -T | grep -v 'all servers'|awk '{print \$2}');do echo "[Spec]\$s:"; rake \$s SPEC_OPTS="--format html" >\${s}.html ; done
+
+- ~/.ssh/config
+ファイル作成 
+> \$ utils/generate_properties.rb -t 'ssh'  > ~/.ssh/config
+
+- 出力結果：鍵認証（パス無し）でログインするホスト
+
+```
+Host bastion
+    User            hoge
+    HostName        192.168.56.1
+    IdentityFile    ~/.ssh/id_rsa
+    Port            22
+    StrictHostKeyChecking no
+    ConnectTimeout  3
+```
+
+- プロパティファイルにてenv=production定義があるエントリ
+bastion経由でのアクセス設定値（ProxyCommand）が出力される。
+```
+Host production-server
+    User            root
+    HostName        192.168.56.8
+    IdentityFile    ~/.ssh/id_rsa
+    Port            22
+    StrictHostKeyChecking no
+    ConnectTimeout  3
+    ProxyCommand ssh bastion nc %h %p
+```

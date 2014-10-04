@@ -89,7 +89,7 @@ Host <%= host %>
     Port            22
     StrictHostKeyChecking no
     ConnectTimeout  3
-    <%- if env == 'development' -%>
+    <%- if env == 'production' -%>
     ProxyCommand ssh bastion nc %h %p
     <%- end -%>
       EOS
