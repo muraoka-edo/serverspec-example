@@ -15,9 +15,9 @@ class GenarateJsonFomatter
       return <<-EOS
 -------------------------
   puts prm.usage: #{prg_name} [options]
-      -t (json|ssh|hosts)
-      -t csv   <hostname>
-      -t hosts (production|development)
+      -t (json|ssh|hostlst)
+      -t flst  <hostname>
+      -t hostlst (production|development)
 -------------------------
       EOS
     }
@@ -61,7 +61,7 @@ class GenarateJsonFomatter
     puts JSON.pretty_generate(@properties)
   end
 
-  def dump_hosts(env)
+  def dump_hostlst(env)
     @properties.map do |p|
       if p[:env] == env
         puts p[:host]
@@ -69,7 +69,7 @@ class GenarateJsonFomatter
     end
   end
 
-  def dump_csv(hostname)
+  def dump_flst(hostname)
     @flsts = Array.new
 
     CSV.foreach(@flst, { :col_sep => ':',
@@ -159,19 +159,19 @@ if __FILE__ == $0
     #GenarateJsonFomatter.new(ARGV[0])
 
     case params['t']
-      when /^csv$/
+      when /^flst$/
         if ARGV[0].nil?
           puts prm.usage; exit 1
         else
-          prm.dump_csv(ARGV[0])
+          prm.dump_flst(ARGV[0])
         end
 
-      when /^hosts$/
+      when /^hostlst$/
         if ARGV[0].nil?
           puts prm.usage; exit 1
         else
-          if ARGV[0] == 'production' || params['t'] == 'development'
-            prm.dump_hosts(ARGV[0])
+          if ARGV[0] == 'production' || ARGV[0] == 'development'
+            prm.dump_hostlst(ARGV[0])
           else
             puts prm.usage; exit 1
           end
