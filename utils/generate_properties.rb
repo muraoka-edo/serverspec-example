@@ -8,12 +8,13 @@ class GenarateJsonFomatter
 
   def initialize
     @hostlst    = _check_config(File.expand_path('~/ops/repos/target/basic_config'))
+    @flst       = _check_config(File.expand_path('~/ops/repos/target/files/flst.tmpl'))
     @properties = Array.new
     _generate_properties
   end
 
   def _check_config(config)
-    if File.exists?(config)
+    if File.exist?(config)
       return config
     else
       puts usage
@@ -45,19 +46,44 @@ class GenarateJsonFomatter
     puts JSON.pretty_generate(@properties)
   end
 
-  def dump_csv
-    {:host=>"bastion", :hostname=>"vmcentos64key", :env=>"production", :user=>"hoge", :roles=>["base", "apache"]}
+  def dump_csv(hostname)
+    #{:host=>"bastion", :hostname=>"vmcentos64key", :env=>"production", :user=>"hoge", :roles=>["base", "apache"]}
+    @flsts = Array.new
 
-    @properties.each do |hs|
-      hs.each do |k, v|
-        case k
-        when /^host$|^env$/
-          print "#{v},"
-        when /^roles$/
-          puts "#{v}"
+    CSV.foreach(@flst, { :col_sep => ':',
+                            :headers => true,
+                            :skip_blanks => true,
+                          }) do |row|
+      attr  = row["attr" ]
+      fname = row["fname"]
+      property_of = Hash.new
+      property_of[:attr ] = attr
+      property_of[:fname] = fname
+      @flsts << property_of
+    end
+
+    @properties.map do |p|
+      if p[:host] == hostname
+        p[:roles].each do |role|
+          @flsts.map do |m|
+            if m[:attr] == role
+              puts m[:fname]
+            end
+          end
         end
       end
     end
+
+#    @properties.each do |hs|
+#      hs.each do |k, v|
+#        case k
+#        when /^host$|^env$/
+#          print "#{v},"
+#        when /^roles$/
+#          puts "#{v}"
+#        end
+#      end
+#    end
   end
 
   def dump_sshconfig
@@ -109,26 +135,29 @@ if __FILE__ == $0
   usage = <<-EOS
 -------------------------
   Usage: #{prg_name} [options]
-      -t TYPE( csv or json )
+      -t (json|ssh)
+      -t csv 'hostname'
 -------------------------
   EOS
   if params['t'].nil?
-    puts usage
-    exit 1
+    puts usage; exit 1
   else
     prm = GenarateJsonFomatter.new
     #GenarateJsonFomatter.new(ARGV[0])
 
     case params['t']
       when /csv/
-        prm.dump_csv
+        if ARGV[0].nil?
+          puts usage; exit 1
+        else
+          prm.dump_csv(ARGV[0])
+        end
       when /json/
         prm.dump_json
       when /ssh/
         prm.dump_sshconfig
       else
-        puts usage
-        exit 1
+        puts usage; exit 1
     end
   end
 
