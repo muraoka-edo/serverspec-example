@@ -15,8 +15,9 @@ class GenarateJsonFomatter
       return <<-EOS
 -------------------------
   puts prm.usage: #{prg_name} [options]
-      -t (json|ssh)
-      -t csv 'hostname'
+      -t (json|ssh|hosts)
+      -t csv   <hostname>
+      -t hosts (production|development)
 -------------------------
       EOS
     }
@@ -58,6 +59,14 @@ class GenarateJsonFomatter
 
   def dump_json
     puts JSON.pretty_generate(@properties)
+  end
+
+  def dump_hosts(env)
+    @properties.map do |p|
+      if p[:env] == env
+        puts p[:host]
+      end
+    end
   end
 
   def dump_csv(hostname)
@@ -150,16 +159,30 @@ if __FILE__ == $0
     #GenarateJsonFomatter.new(ARGV[0])
 
     case params['t']
-      when /csv/
+      when /^csv$/
         if ARGV[0].nil?
           puts prm.usage; exit 1
         else
           prm.dump_csv(ARGV[0])
         end
-      when /json/
+
+      when /^hosts$/
+        if ARGV[0].nil?
+          puts prm.usage; exit 1
+        else
+          if ARGV[0] == 'production' || params['t'] == 'development'
+            prm.dump_hosts(ARGV[0])
+          else
+            puts prm.usage; exit 1
+          end
+        end
+      
+      when /^json$/
         prm.dump_json
-      when /ssh/
+
+      when /^ssh$/
         prm.dump_sshconfig
+
       else
         puts prm.usage; exit 1
     end
