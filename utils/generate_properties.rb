@@ -132,7 +132,11 @@ class GenarateJsonFomatter
 Host <%= host %>
     User            <%= user %>
     HostName        <%= hostname %>
+    <%- if env == 'production' -%>
+    IdentityFile    ~/.ssh/keys/id_rsa_vmcentos64key
+    <%- else -%>
     IdentityFile    ~/.ssh/id_rsa
+    <%- end -%>
     Port            22
     StrictHostKeyChecking no
     ConnectTimeout  3
