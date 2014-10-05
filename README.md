@@ -87,3 +87,42 @@ Host production-server
     ConnectTimeout  3
     ProxyCommand ssh bastion nc %h %p
 ```
+
+- ディレクトリ構成
+```
+ops
+├── repos
+│   ├── server_config.git
+│   ├── target
+│   │   ├── basic_config
+│   │   ├── files
+│   │   │   └── flst.tmpl
+│   │   └── hosts
+│   │       └── hostlst.txt
+│   └── worktree
+├── git-compare
+│   ├── capistrano
+│   │   ├── Capfile
+│   │   └── config
+│   │       └──  deploy.rb
+│   ├── extlib
+│   │   └── plogger.rb
+│   ├── logs
+│   │   └── deploy.rb.log
+│   └── scripts
+│       ├── archive_file.rb
+│       ├── rake_register_git.rb
+│       └── scpfiles
+│           ├── downloads
+│           └── uploads
+└── serverspec-example
+    ├── README.md
+    ├── Rakefile
+    ├── properties.json
+    ├── spec
+    │   ├── base
+    │   │   └── common_spec.rb
+    │   └── spec_helper.rb
+    └── utils
+        └── generate_properties.rb
+```
