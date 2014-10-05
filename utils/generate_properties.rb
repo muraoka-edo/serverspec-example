@@ -7,26 +7,40 @@ require 'csv'
 class GenarateJsonFomatter
 
   def initialize
-    @hostlst    = _check_config(File.expand_path('~/ops/repos/target/basic_config'))
-    @flst       = _check_config(File.expand_path('~/ops/repos/target/files/flst.tmpl'))
+    @flst       = _check_config(File.expand_path('~/ops/repos/target/all_files.lst'))
+    @config     = _check_config(File.expand_path('~/ops/repos/target/basic_config.tsv'))
     @properties = Array.new
+    @usage      = -> {
+      prg_name  = File.basename(__FILE__)
+      return <<-EOS
+-------------------------
+  puts prm.usage: #{prg_name} [options]
+      -t (json|ssh)
+      -t csv 'hostname'
+-------------------------
+      EOS
+    }
     _generate_properties
   end
 
-  def _check_config(config)
-    if File.exist?(config)
-      return config
+  def usage
+    puts @usage.call
+  end
+
+  def _check_config(fname)
+    if File.exist?(fname)
+      return fname
     else
-      puts usage
-      exit 1
+      puts "[Error]: No such file: #{fname}"
+      puts usage; exit 1
     end
   end
 
   def _generate_properties
-    CSV.foreach(@hostlst, { :col_sep => ' ',
-                            :headers => true,
-                            :skip_blanks => true,
-                          }) do |row|
+    CSV.foreach(@config, { :col_sep => ' ',
+                           :headers => true,
+                           :skip_blanks => true,
+                         }) do |row|
       host      = row["host"    ]
       hostname  = row["hostname"]
       env       = row["env"     ]
@@ -47,13 +61,12 @@ class GenarateJsonFomatter
   end
 
   def dump_csv(hostname)
-    #{:host=>"bastion", :hostname=>"vmcentos64key", :env=>"production", :user=>"hoge", :roles=>["base", "apache"]}
     @flsts = Array.new
 
     CSV.foreach(@flst, { :col_sep => ':',
-                            :headers => true,
-                            :skip_blanks => true,
-                          }) do |row|
+                         :headers => true,
+                         :skip_blanks => true,
+                       }) do |row|
       attr  = row["attr" ]
       fname = row["fname"]
       property_of = Hash.new
@@ -73,7 +86,6 @@ class GenarateJsonFomatter
         end
       end
     end
-
 #    @properties.each do |hs|
 #      hs.each do |k, v|
 #        case k
@@ -129,26 +141,18 @@ end
 if __FILE__ == $0 
   require 'optparse'
 
+  prm = GenarateJsonFomatter.new
   params   = ARGV.getopts('t:')
-  prg_name = File.basename(__FILE__)
 
-  usage = <<-EOS
--------------------------
-  Usage: #{prg_name} [options]
-      -t (json|ssh)
-      -t csv 'hostname'
--------------------------
-  EOS
   if params['t'].nil?
-    puts usage; exit 1
+    puts prm.usage; exit 1
   else
-    prm = GenarateJsonFomatter.new
     #GenarateJsonFomatter.new(ARGV[0])
 
     case params['t']
       when /csv/
         if ARGV[0].nil?
-          puts usage; exit 1
+          puts prm.usage; exit 1
         else
           prm.dump_csv(ARGV[0])
         end
@@ -157,9 +161,8 @@ if __FILE__ == $0
       when /ssh/
         prm.dump_sshconfig
       else
-        puts usage; exit 1
+        puts prm.usage; exit 1
     end
   end
 
 end
-
