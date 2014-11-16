@@ -1,28 +1,30 @@
 [
   {
     "host": "bastion",
-    "hostname": "testbastion",
-    "env": "production",
+    "hostname": "vmcentos64key",
+    "env": "development",
     "user": "hoge",
     "roles": [
-      "base",
-      "apache"
-    ],
-    "features": [
-      "os",
-      "apache"
+      "rhel61",
+      "apache22"
     ]
   },
   {
-    "host": "vmcentos70key",
-    "hostname": "testvmcentos70key",
+    "host": "centos7a",
+    "hostname": "192.168.56.7",
     "env": "production",
-    "user": "hoge",
+    "user": "root",
     "roles": [
-      "base"
-    ],
-    "features": [
-      "os"
+      "rhel61"
+    ]
+  },
+  {
+    "host": "centos7b",
+    "hostname": "192.168.56.8",
+    "env": "production",
+    "user": "root",
+    "roles": [
+      "rhel61"
     ]
   }
 ]

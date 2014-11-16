@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Command &quot;uname&quot;" tests="1" time="0.597216" failures="0" errors="0" skipped="0">
+  <testcase name="Command &quot;uname&quot; should return stdout &quot;Linux&quot;" time="0.596771">
+  </testcase>
+  <system-out>
+  </system-out>
+  <system-err>
+CommandResult#[] is obsolete. Use accessors instead. in /Users/edo/.rbenv/versions/1.9.3-p448/lib/ruby/gems/1.9.1/gems/serverspec-0.13.3/lib/serverspec/type/command.rb:11:in `return_stdout?'
+  </system-err>
+</testsuite>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Service &quot;httpd&quot;" tests="2" time="0.453346" failures="2" errors="0" skipped="0">
+  <testcase name="Service &quot;httpd&quot; should be enabled" time="0.190566">
+    <failure type="RSpec::Expectations::ExpectationNotMetError" message="expected Service &quot;httpd&quot; to be enabled">
+expected Service "httpd" to be enabled (RSpec::Expectations::ExpectationNotMetError)
+expected Service "httpd" to be enabled
+     ./spec/apache22/config_spec.rb:4:in `block (2 levels) in &lt;top (required)&gt;'    </failure>
+  </testcase>
+  <testcase name="Service &quot;httpd&quot; should be running" time="0.262224">
+    <failure type="RSpec::Expectations::ExpectationNotMetError" message="expected Service &quot;httpd&quot; to be running">
+expected Service "httpd" to be running (RSpec::Expectations::ExpectationNotMetError)
+expected Service "httpd" to be running
+     ./spec/apache22/config_spec.rb:5:in `block (2 levels) in &lt;top (required)&gt;'    </failure>
+  </testcase>
+  <system-out>
+  </system-out>
+  <system-err>
+  </system-err>
+</testsuite>

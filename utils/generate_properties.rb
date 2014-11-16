@@ -44,13 +44,13 @@ class GenarateJsonFomatter
                          }) do |row|
       host      = row["host"    ]
       hostname  = row["hostname"]
-      env       = row["env"     ]
+      stage     = row["stage"   ]
       user      = row["user"    ]
       roles     = row["roles"   ].split(':')
       property_of = Hash.new
       property_of[:host    ] = host
       property_of[:hostname] = hostname
-      property_of[:env     ] = env
+      property_of[:stage   ] = stage
       property_of[:user    ] = user
       property_of[:roles   ] = roles
       @properties << property_of
@@ -61,9 +61,9 @@ class GenarateJsonFomatter
     puts JSON.pretty_generate(@properties)
   end
 
-  def dump_hostlst(env)
+  def dump_hostlst(stage)
     @properties.map do |p|
-      if p[:env] == env
+      if p[:stage] == stage
         puts p[:host]
       end
     end
@@ -98,7 +98,7 @@ class GenarateJsonFomatter
 #    @properties.each do |hs|
 #      hs.each do |k, v|
 #        case k
-#        when /^host$|^env$/
+#        when /^host$|^stage$/
 #          print "#{v},"
 #        when /^roles$/
 #          puts "#{v}"
@@ -114,7 +114,7 @@ class GenarateJsonFomatter
       host     =''
       user     =''
       hostname =''
-      env      =''
+      stage      =''
       hs.each do |k, v|
         case k
         when /^host$/
@@ -123,8 +123,8 @@ class GenarateJsonFomatter
           user = v
         when /^hostname$/
           hostname = v
-        when /^env$/
-          env = v
+        when /^stage$/
+          stage = v
         end
       end
 
@@ -132,7 +132,7 @@ class GenarateJsonFomatter
 Host <%= host %>
     User            <%= user %>
     HostName        <%= hostname %>
-    <%- if env == 'production' -%>
+    <%- if stage == 'production' -%>
     IdentityFile    ~/.ssh/keys/id_rsa_vmcentos64key
     <%- else -%>
     IdentityFile    ~/.ssh/id_rsa
@@ -140,7 +140,7 @@ Host <%= host %>
     Port            22
     StrictHostKeyChecking no
     ConnectTimeout  3
-    <%- if env == 'production' -%>
+    <%- if stage == 'production' -%>
     ProxyCommand ssh bastion nc %h %p
     <%- end -%>
       EOS

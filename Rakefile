@@ -27,6 +27,7 @@ namespace :serverspec do
       t.target_host = server['host']
       t.target_env  = server['env' ]
       t.pattern = 'spec/{' + server['roles'].join(',') + '}/*_spec.rb'
+      t.fail_on_error = false
     end
   end
 end
