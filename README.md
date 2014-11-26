@@ -46,22 +46,29 @@ $ cat properties.yml
   }
 ]
 ```
-    
+
 
 - rake -T
 テストケースを表示
-> \$ rake -T
+
+```
+$ rake -T
 rake serverspec:tst-vmcentos70a   # Run serverspec to tst-vmcentos70a
 rake serverspec:tst-vmcentos70b   # Run serverspec to tst-vmcentos70b
 rake serverspec:tst-vmcentos70ba  # Run serverspec to tst-vmcentos70ba
 rake spec                         # Run serverspec to all servers
+```
 
 - Serverspec実行
-  > \$ for s in \$(rake -T | grep -v 'all servers'|awk '{print \$2}');do echo "[Spec]\$s:"; rake \$s SPEC_OPTS="--format html" >\${s}.html ; done
+```
+$ for s in \$(rake -T | grep -v 'all servers'|awk '{print \$2}');do echo "[Spec]\$s:"; rake \$s SPEC_OPTS="--format html" >\${s}.html ; done
+```
 
 - ~/.ssh/config
 ファイル作成 
-> \$ utils/generate_properties.rb -t 'ssh'  > ~/.ssh/config
+```
+$ utils/generate_properties.rb -t 'ssh'  > ~/.ssh/config
+```
 
 - 出力結果：鍵認証（パス無し）でログインするホスト
 
@@ -134,7 +141,8 @@ ops
 - ~/.ssh/config
    踏み台サーバー
 
-```Host bastion
+```
+Host bastion
      User            hoge
      HostName        vmcentos64key
      IdentityFile    ~/.ssh/id_rsa
