@@ -126,3 +126,111 @@ ops
     └── utils
         └── generate_properties.rb
 ```
+
+
+---
+あとで修正
+
+- ~/.ssh/config
+   踏み台サーバー
+
+```Host bastion
+     User            hoge
+     HostName        vmcentos64key
+     IdentityFile    ~/.ssh/id_rsa
+     Port            22  
+```
+
+   接続先サーバー
+
+```
+Host vmcentos70key
+    User            hoge
+    HostName        192.168.56.8
+    IdentityFile    ~/.ssh/keys/id_rsa_vmcentos64key
+    Port            22  
+    ProxyCommand ssh bastion nc %h %p
+    
+
+{"bastion"=>
+   {:roles=>["base", "apache"],
+    :host_name=>"bastion"}
+ }
+```
+
+```
+$ ./print_properties.rb tmpl/properties.base.csv  > print_properties.rb
+$ cat properties.json 
+[
+  {
+    "host": "bastion",
+    "hostname": "vmcentos64key",
+    "env": "production",
+    "user": "hoge",
+    "roles": [
+      "base"
+    ]
+  },
+  {
+    "host": "vmcentos70key",
+    "hostname": "192.168.56.8",
+    "env": "production",
+    "user": "edo",
+    "roles": [
+      "base"
+    ]
+  }
+]
+```
+
+- rake -T
+テストケースを表示
+```
+$ rake -T
+rake serverspec:tst-vmcentos70a   # Run serverspec to tst-vmcentos70a
+rake serverspec:tst-vmcentos70b   # Run serverspec to tst-vmcentos70b
+rake serverspec:tst-vmcentos70ba  # Run serverspec to tst-vmcentos70ba
+rake spec                         # Run serverspec to all servers
+```
+
+実行
+```
+$ for s in \$(rake -T | grep -v 'all servers'|awk '{print \$2}');do echo "[Spec]\$s:"; rake \$s SPEC_OPTS="--format html" >\${s}.html ; done
+```
+
+```
+$ cat Rakefile 
+require 'rake'
+require 'rspec/core/rake_task'
+require 'ci/reporter/rake/rspec'
+require 'json'
+
+servers = JSON.parse(File.read('properties.json'))
+
+desc "Run serverspec to all servers"
+task :spec => 'serverspec:all'
+
+class ServerspecTask < RSpec::Core::RakeTask
+  attr_accessor :target_host, :target_env
+
+  def spec_command
+    cmd = super
+    "env TARGET_HOST=#{target_host} \
+         TARGET_ENV=#{ target_env } \
+    #{cmd}"
+  end
+end
+
+namespace :serverspec do
+  task :all => servers.map {|s| 'serverspec:' + s['host'] }
+  servers.each do |server|
+    desc "Run serverspec to #{server['host']}"
+    ServerspecTask.new(server['host'].to_sym) do |t|
+      t.target_host = server['host']
+      t.target_env  = server['env' ]
+      t.pattern = 'spec/{' + server['roles'].join(',') + '}/*_spec.rb'
+      t.fail_on_error = false
+    end
+  end
+end
+```
