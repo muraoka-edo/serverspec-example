@@ -166,6 +166,11 @@ Host vmcentos70key
  }
 ```
 
+- 途中でエラーがでても終了しない
+http://qiita.com/haazime/items/1cfab4e1e34b23f20ce1
+
+
+
 ```
 $ ./print_properties.rb tmpl/properties.base.csv  > print_properties.rb
 $ cat properties.json 
